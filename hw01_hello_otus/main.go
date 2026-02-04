@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"golang.org/x/example/hello/reverse"
+)
 
 func main() {
-	fmt.Println("Hello, OTUS!")
+	fmt.Println(reverse.String("Hello, OTUS!"))
 }
