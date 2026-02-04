@@ -1,4 +1,4 @@
-module github.com/MAWINA-ant/hw-otus/tree/hw01_hello_otus
+module github.com/MAWINA-ant/hw-otus/hw01_hello_otus
 
 go 1.23
 
