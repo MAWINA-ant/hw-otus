@@ -9,16 +9,27 @@ var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(str string) (string, error) {
 	strRunes := []rune(str)
-	var currentRune rune
+	var resultRunes []rune
+	canAppend := false
 	for _, c := range strRunes {
-		if currentRune == 0 {
-			if unicode.IsDigit(c) {
+		if unicode.IsDigit(c) {
+			if !canAppend {
 				return "", ErrInvalidString
-			} else {
-				currentRune = c
 			}
+			countRepetitions := c - '0'
+			if countRepetitions == 0 {
+				resultRunes = resultRunes[:len(resultRunes)-1]
+			} else {
+				appendRune := resultRunes[len(resultRunes)-1]
+				for i := 0; i < int(countRepetitions)-1; i++ {
+					resultRunes = append(resultRunes, appendRune)
+				}
+			}
+			canAppend = false
+		} else {
+			resultRunes = append(resultRunes, c)
+			canAppend = true
 		}
-
 	}
-	return "", nil
+	return string(resultRunes), nil
 }
