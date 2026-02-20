@@ -8,10 +8,9 @@ import (
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(str string) (string, error) {
-	strRunes := []rune(str)
 	var resultRunes []rune
 	canAppend := false
-	for _, c := range strRunes {
+	for _, c := range str {
 		if unicode.IsDigit(c) {
 			if !canAppend {
 				return "", ErrInvalidString
