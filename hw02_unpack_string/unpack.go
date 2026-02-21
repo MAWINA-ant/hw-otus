@@ -12,7 +12,8 @@ func Unpack(str string) (string, error) {
 	canMultiply := false
 	isBackSlash := false
 	for _, v := range str {
-		if unicode.IsDigit(v) {
+		switch {
+		case unicode.IsDigit(v):
 			if isBackSlash {
 				resultRunes = append(resultRunes, v)
 				canMultiply = true
@@ -32,7 +33,7 @@ func Unpack(str string) (string, error) {
 				}
 				canMultiply = false
 			}
-		} else if v == '\\' {
+		case v == '\\':
 			if isBackSlash {
 				resultRunes = append(resultRunes, v)
 				canMultiply = true
@@ -40,7 +41,7 @@ func Unpack(str string) (string, error) {
 			} else {
 				isBackSlash = true
 			}
-		} else {
+		default:
 			if isBackSlash {
 				return "", ErrInvalidString
 			}
