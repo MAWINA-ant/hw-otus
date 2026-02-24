@@ -2,11 +2,52 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"unicode"
 )
 
 var ErrInvalidString = errors.New("invalid string")
 
-func Unpack(_ string) (string, error) {
-	// Place your code here.
-	return "", nil
+func Unpack(str string) (string, error) {
+	var resultRunes []rune
+	canMultiply := false
+	isBackSlash := false
+	for _, v := range str {
+		switch {
+		case unicode.IsDigit(v):
+			if isBackSlash {
+				resultRunes = append(resultRunes, v)
+				canMultiply = true
+				isBackSlash = false
+			} else {
+				if !canMultiply {
+					return "", ErrInvalidString
+				}
+				countRepetitions := v - '0'
+				if countRepetitions == 0 {
+					resultRunes = resultRunes[:len(resultRunes)-1]
+				} else {
+					appendRune := resultRunes[len(resultRunes)-1]
+					for i := 0; i < int(countRepetitions)-1; i++ {
+						resultRunes = append(resultRunes, appendRune)
+					}
+				}
+				canMultiply = false
+			}
+		case v == '\\':
+			if isBackSlash {
+				resultRunes = append(resultRunes, v)
+				canMultiply = true
+				isBackSlash = false
+			} else {
+				isBackSlash = true
+			}
+		default:
+			if isBackSlash {
+				return "", ErrInvalidString
+			}
+			resultRunes = append(resultRunes, v)
+			canMultiply = true
+		}
+	}
+	return string(resultRunes), nil
 }
