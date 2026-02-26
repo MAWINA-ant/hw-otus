@@ -24,7 +24,7 @@ func Top10(str string) []string {
 		}
 		resultMap[clearWord]++
 	}
-	var sliceMap []keyValue
+	sliceMap := []keyValue{}
 	for k, v := range resultMap {
 		sliceMap = append(sliceMap, keyValue{k, v})
 	}
