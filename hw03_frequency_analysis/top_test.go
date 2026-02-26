@@ -49,6 +49,8 @@ var text2 = `и и И и и и. и и и и и И ...на на на на на н
 
 var text3 = `фыва олдж фыва`
 
+var text4 = `а б в г д Е Ё Ж з и й к Л М Н ф и к л м н о п р с т . . . - - - --- --- --- -- --`
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
@@ -111,6 +113,24 @@ func TestTop10(t *testing.T) {
 				"олдж", // 1
 			}
 			require.Equal(t, expected, Top10(text3))
+		}
+	})
+
+	t.Run("positive test text4", func(t *testing.T) {
+		if taskWithAsteriskIsCompleted {
+			expected := []string{
+				"---", //3
+				"--",  //2
+				"и",   //2
+				"к",   //2
+				"л",   //2
+				"м",   //2
+				"н",   //2
+				"а",   //1
+				"б",   //1
+				"в",   //1
+			}
+			require.Equal(t, expected, Top10(text4))
 		}
 	})
 }

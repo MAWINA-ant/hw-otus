@@ -16,8 +16,9 @@ func Top10(str string) []string {
 	resultMap := make(map[string]uint)
 	words := strings.Fields(str)
 	re := regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
+	reminus := regexp.MustCompile(`-+`)
 	for _, word := range words {
-		clearWord := clearWord(word, re)
+		clearWord := clearWord(word, re, reminus)
 		if clearWord == "" {
 			continue
 		}
@@ -42,9 +43,12 @@ func Top10(str string) []string {
 	return result
 }
 
-func clearWord(word string, re *regexp.Regexp) string {
+func clearWord(word string, re, reminus *regexp.Regexp) string {
 	if word == "-" {
 		return ""
+	}
+	if reminus.FindString(word) != "" {
+		return word
 	}
 	word = strings.ToLower(word)
 	return re.ReplaceAllString(word, "")
