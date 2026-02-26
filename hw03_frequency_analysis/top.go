@@ -15,14 +15,15 @@ func Top10(str string) []string {
 	result := make([]string, 0, 10)
 	resultMap := make(map[string]uint)
 	words := strings.Fields(str)
+	re := regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
 	for _, word := range words {
-		clearWord := clearWord(word)
+		clearWord := clearWord(word, re)
 		if clearWord == "" {
 			continue
 		}
 		resultMap[clearWord]++
 	}
-	sliceMap := make([]keyValue, 0, 10)
+	var sliceMap []keyValue
 	for k, v := range resultMap {
 		sliceMap = append(sliceMap, keyValue{k, v})
 	}
@@ -41,11 +42,10 @@ func Top10(str string) []string {
 	return result
 }
 
-func clearWord(word string) string {
+func clearWord(word string, re *regexp.Regexp) string {
 	if word == "-" {
 		return ""
 	}
 	word = strings.ToLower(word)
-	re := regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
 	return re.ReplaceAllString(word, "")
 }
