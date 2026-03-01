@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
-var re = regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
-var reminus = regexp.MustCompile(`-+`)
+var (
+	re      = regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
+	reminus = regexp.MustCompile(`-+`)
+)
 
 type keyValue struct {
 	key   string
