@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+var re = regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
+var reminus = regexp.MustCompile(`-+`)
+
 type keyValue struct {
 	key   string
 	value uint
@@ -15,10 +18,9 @@ func Top10(str string) []string {
 	result := make([]string, 0, 10)
 	resultMap := make(map[string]uint)
 	words := strings.Fields(str)
-	re := regexp.MustCompile(`^[\p{P}]+|[\p{P}]+$`)
-	reminus := regexp.MustCompile(`-+`)
+
 	for _, word := range words {
-		clearWord := clearWord(word, re, reminus)
+		clearWord := clearWord(word)
 		if clearWord == "" {
 			continue
 		}
@@ -43,7 +45,7 @@ func Top10(str string) []string {
 	return result
 }
 
-func clearWord(word string, re, reminus *regexp.Regexp) string {
+func clearWord(word string) string {
 	if word == "-" {
 		return ""
 	}
