@@ -15,6 +15,36 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
+	t.Run("once element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushBack(22)
+		require.Equal(t, 22, l.Back().Value)
+		require.Equal(t, 22, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.MoveToFront(l.Back())
+		require.Equal(t, 22, l.Back().Value)
+		require.Equal(t, 22, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.Remove(l.Back())
+		require.Nil(t, l.Back())
+		require.Nil(t, l.Front())
+		require.Equal(t, 0, l.Len())
+
+		l.PushFront(12)
+		require.Equal(t, 12, l.Back().Value)
+		require.Equal(t, 12, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.MoveToFront(l.Front())
+		require.Equal(t, 12, l.Back().Value)
+		require.Equal(t, 12, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.Remove(l.Front())
+		require.Nil(t, l.Back())
+		require.Nil(t, l.Front())
+		require.Equal(t, 0, l.Len())
+	})
+
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 
