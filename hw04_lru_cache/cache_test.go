@@ -79,8 +79,6 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
-
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
@@ -98,6 +96,10 @@ func TestCacheMultithreading(t *testing.T) {
 			c.Get(Key(strconv.Itoa(rand.Intn(1_000_000))))
 		}
 	}()
-
 	wg.Wait()
+
+	c.Set("qwe", 123)
+	v, ok := c.Get("qwe")
+	require.True(t, ok)
+	require.Equal(t, 123, v)
 }

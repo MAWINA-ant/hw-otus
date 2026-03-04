@@ -70,12 +70,16 @@ func (l *list) Remove(i *ListItem) {
 	case i == l.back:
 		i.Prev.Next = nil
 		l.back = i.Prev
+		i.Prev = nil
 	case i == l.front:
 		i.Next.Prev = nil
 		l.front = i.Next
+		i.Next = nil
 	default:
 		i.Prev.Next = i.Next
 		i.Next.Prev = i.Prev
+		i.Prev = nil
+		i.Next = nil
 	}
 	l.length--
 }
