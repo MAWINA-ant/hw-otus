@@ -15,6 +15,36 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
+	t.Run("once element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushBack(22)
+		require.Equal(t, 22, l.Back().Value)
+		require.Equal(t, 22, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.MoveToFront(l.Back())
+		require.Equal(t, 22, l.Back().Value)
+		require.Equal(t, 22, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.Remove(l.Back())
+		require.Nil(t, l.Back())
+		require.Nil(t, l.Front())
+		require.Equal(t, 0, l.Len())
+
+		l.PushFront(12)
+		require.Equal(t, 12, l.Back().Value)
+		require.Equal(t, 12, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.MoveToFront(l.Front())
+		require.Equal(t, 12, l.Back().Value)
+		require.Equal(t, 12, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+		l.Remove(l.Front())
+		require.Nil(t, l.Back())
+		require.Nil(t, l.Front())
+		require.Equal(t, 0, l.Len())
+	})
+
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 
@@ -47,5 +77,20 @@ func TestList(t *testing.T) {
 			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
+	})
+
+	t.Run("move to front the same object", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		l.PushBack(2)
+		l.PushBack(3)
+		l.PushBack(4)
+		l.PushBack(5)
+		el := l.Back()
+		l.MoveToFront(el)
+		l.MoveToFront(el)
+		l.MoveToFront(el)
+		require.Equal(t, 5, l.Front().Value)
 	})
 }
