@@ -28,6 +28,7 @@ func (ec *LimitErrorCounter) SetError(err error) {
 	defer ec.mu.Unlock()
 	ec.err = err
 }
+
 func (ec *LimitErrorCounter) GetError() error {
 	ec.mu.Lock()
 	defer ec.mu.Unlock()
