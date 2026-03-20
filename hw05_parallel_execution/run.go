@@ -5,6 +5,35 @@ import (
 	"sync"
 )
 
+type LimitErrorCounter struct {
+	mu    sync.Mutex
+	value int
+	err   error
+}
+
+func (ec *LimitErrorCounter) Increment() {
+	ec.mu.Lock()
+	defer ec.mu.Unlock()
+	ec.value++
+}
+
+func (ec *LimitErrorCounter) GetValue() int {
+	ec.mu.Lock()
+	defer ec.mu.Unlock()
+	return ec.value
+}
+
+func (ec *LimitErrorCounter) SetError(err error) {
+	ec.mu.Lock()
+	defer ec.mu.Unlock()
+	ec.err = err
+}
+func (ec *LimitErrorCounter) GetError() error {
+	ec.mu.Lock()
+	defer ec.mu.Unlock()
+	return ec.err
+}
+
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 
 type Task func() error
@@ -12,36 +41,32 @@ type Task func() error
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
 	ch := make(chan Task, len(tasks))
-	for _, t := range tasks {
-		ch <- t
-	}
-	close(ch)
+	go func() {
+		for _, t := range tasks {
+			ch <- t
+		}
+		close(ch)
+	}()
 
 	wg := sync.WaitGroup{}
-	mu := sync.Mutex{}
-	countErrors := 0
-	var resErr error
+	var errorCounter LimitErrorCounter
 	for range n {
 		wg.Add(1)
-		go func(ch <-chan Task) {
+		go func() {
 			defer wg.Done()
-			for {
-				task, ok := <-ch
-				if !ok {
-					break
+			for task := range ch {
+				err := task()
+				if err != nil {
+					errorCounter.Increment()
 				}
-				if task() != nil {
-					mu.Lock()
-					countErrors++
-					mu.Unlock()
-				}
-				if countErrors >= m && m > 0 {
-					resErr = ErrErrorsLimitExceeded
+				if errorCounter.GetValue() >= m && m > 0 {
+					errorCounter.SetError(ErrErrorsLimitExceeded)
 					break
 				}
 			}
-		}(ch)
+		}()
 	}
 	wg.Wait()
-	return resErr
+
+	return errorCounter.err
 }
