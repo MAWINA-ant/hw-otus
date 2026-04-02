@@ -24,9 +24,20 @@ func runStage(in In, done In, stage Stage) Out {
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	currentIn := in
-	for _, stage := range stages {
-		currentIn = runStage(currentIn, done, stage)
-	}
-	return currentIn
+	out := make(Bi)
+	go func() {
+		defer close(out)
+		currentIn := in
+		for _, stage := range stages {
+			currentIn = runStage(currentIn, done, stage)
+		}
+		for i := range currentIn {
+			select {
+			case <-done:
+				return
+			case out <- i:
+			}
+		}
+	}()
+	return out
 }
