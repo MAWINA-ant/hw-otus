@@ -1,0 +1,112 @@
+package pipe
+
+type (
+	In  = <-chan interface{}
+	Out = In
+	Bi  = chan interface{}
+)
+
+type Stage func(in In) Out
+
+// ExecutePipeline строит цепочку стейджей, обеспечивая остановку при закрытии done.
+func ExecutePipeline(in In, done In, stages ...Stage) Out {
+	// Создаём обёртку для входного канала in, которая будет реагировать на done.
+	wrappedIn := make(Bi)
+	// Запускаем горутину, которая читает из in и пишет в wrappedIn, но с проверкой done.
+	go func() {
+		defer close(wrappedIn)
+		for {
+			select {
+			case <-done:
+				// При сигнале остановки выходим, не читая больше из in.
+				return
+			case v, ok := <-in:
+				if !ok {
+					// Исходный канал закрыт – данных больше нет.
+					return
+				}
+				// Пытаемся отправить значение в обёртку, но тоже проверяем done.
+				select {
+				case wrappedIn <- v:
+				case <-done:
+					return
+				}
+			}
+		}
+	}()
+
+	// Текущий входной канал – обёрнутый.
+	current := Out(wrappedIn)
+
+	// Последовательно обрабатываем все стейджи.
+	for _, stage := range stages {
+		current = runStage(current, done, stage)
+	}
+	return current
+}
+
+// runStage запускает один стейдж и возвращает выходной канал,
+// который будет закрыт после обработки всех данных или остановки.
+func runStage(in In, done In, stage Stage) Out {
+	// Создаём канал, который будет передан в стейдж как входной.
+	stageIn := make(Bi)
+	// Запускаем горутину, которая читает из in и пишет в stageIn, с проверкой done.
+	go func() {
+		defer close(stageIn)
+		for {
+			select {
+			case <-done:
+				return
+			case v, ok := <-in:
+				if !ok {
+					return
+				}
+				select {
+				case stageIn <- v:
+				case <-done:
+					return
+				}
+			}
+		}
+	}()
+
+	// Запускаем оригинальный стейдж, передавая ему управляемый канал stageIn.
+	// Стейдж вернёт свой выходной канал (stageOut), из которого мы будем читать.
+	stageOut := stage(stageIn)
+
+	// Создаём выходной канал для этого обёрнутого стейджа.
+	out := make(Bi)
+
+	go func() {
+		defer close(out) // гарантия закрытия выходного канала
+
+		for {
+			select {
+			case <-done:
+				// При остановке нужно опустошить stageOut, чтобы разблокировать горутину стейджа,
+				// если она пытается отправить значение. Иначе она зависнет навсегда.
+				for range stageOut {
+				}
+				return
+
+			case v, ok := <-stageOut:
+				if !ok {
+					// Канал stageOut закрыт – стейдж завершил работу.
+					return
+				}
+				// Пытаемся отправить значение дальше, но тоже с проверкой done.
+				select {
+				case out <- v:
+				case <-done:
+					// Если во время отправки пришёл сигнал остановки,
+					// также опустошаем stageOut и выходим.
+					for range stageOut {
+					}
+					return
+				}
+			}
+		}
+	}()
+
+	return out
+}
