@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-jose/go-jose/v4/testutils/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCopy(t *testing.T) {
@@ -26,12 +26,18 @@ func TestCopy(t *testing.T) {
 		limit    int64
 		standard string
 	}{
-		{name: "no limit and no offset", from: "./testdata/input.txt", to: "./test_out.txt", offset: 0, limit: 0, standard: "./testdata/out_offset0_limit0.txt"},
-		{name: "limit 10 and no offset", from: "./testdata/input.txt", to: "./test_out.txt", offset: 0, limit: 10, standard: "./testdata/out_offset0_limit10.txt"},
-		{name: "limit 1000 and no offset", from: "./testdata/input.txt", to: "./test_out.txt", offset: 0, limit: 1000, standard: "./testdata/out_offset0_limit1000.txt"},
-		{name: "limit 10000 and no offset", from: "./testdata/input.txt", to: "./test_out.txt", offset: 0, limit: 10000, standard: "./testdata/out_offset0_limit10000.txt"},
-		{name: "limit 1000 and offset 100", from: "./testdata/input.txt", to: "./test_out.txt", offset: 100, limit: 1000, standard: "./testdata/out_offset100_limit1000.txt"},
-		{name: "limit 1000 and offset 6000", from: "./testdata/input.txt", to: "./test_out.txt", offset: 6000, limit: 1000, standard: "./testdata/out_offset6000_limit1000.txt"},
+		{name: "no limit and no offset", from: "./testdata/input.txt",
+			to: "./test_out.txt", offset: 0, limit: 0, standard: "./testdata/out_offset0_limit0.txt"},
+		{name: "limit 10 and no offset", from: "./testdata/input.txt",
+			to: "./test_out.txt", offset: 0, limit: 10, standard: "./testdata/out_offset0_limit10.txt"},
+		{name: "limit 1000 and no offset", from: "./testdata/input.txt",
+			to: "./test_out.txt", offset: 0, limit: 1000, standard: "./testdata/out_offset0_limit1000.txt"},
+		{name: "limit 10000 and no offset", from: "./testdata/input.txt",
+			to: "./test_out.txt", offset: 0, limit: 10000, standard: "./testdata/out_offset0_limit10000.txt"},
+		{name: "limit 1000 and offset 100", from: "./testdata/input.txt",
+			to: "./test_out.txt", offset: 100, limit: 1000, standard: "./testdata/out_offset100_limit1000.txt"},
+		{name: "limit 1000 and offset 6000", from: "./testdata/input.txt",
+			to: "./test_out.txt", offset: 6000, limit: 1000, standard: "./testdata/out_offset6000_limit1000.txt"},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

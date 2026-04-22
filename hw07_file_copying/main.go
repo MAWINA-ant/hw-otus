@@ -2,8 +2,7 @@ package main
 
 import (
 	"flag"
-
-	"github.com/google/martian/v3/log"
+	"fmt"
 )
 
 var (
@@ -22,6 +21,6 @@ func main() {
 	flag.Parse()
 	err := Copy(from, to, offset, limit)
 	if err != nil {
-		log.Errorf("Couldn't copy file error: %s", err)
+		fmt.Println("Copy was broken. Error: ", err)
 	}
 }
