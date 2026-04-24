@@ -40,7 +40,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		limit = fiSize
 	}
 	countBytes := min(limit, fiSize-offset)
-	bar := pb.Full.Start64(limit)
+	bar := pb.Full.Start64(countBytes)
 	defer bar.Finish()
 	barReader := bar.NewProxyReader(fi)
 	_, err = io.CopyN(fo, barReader, countBytes)
