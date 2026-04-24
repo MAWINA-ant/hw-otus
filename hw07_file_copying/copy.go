@@ -23,10 +23,11 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
-	fiSize := fiStat.Size()
-	if fiSize == 0 {
+	fiType := fiStat.Mode().Type()
+	if fiType&os.ModeDevice != 0 || fiType&os.ModeTemporary != 0 || fiType&os.ModeCharDevice != 0 {
 		return ErrUnsupportedFile
 	}
+	fiSize := fiStat.Size()
 	if offset > fiSize {
 		return ErrOffsetExceedsFileSize
 	}
