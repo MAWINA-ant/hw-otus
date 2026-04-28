@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"os"
 	"strings"
 )
+
+var ErrNotDirectory = errors.New("dir path is not a directory")
 
 type Environment map[string]EnvValue
 
@@ -22,9 +25,9 @@ func ReadDir(dir string) (Environment, error) {
 		return nil, err
 	}
 	if !info.IsDir() {
-		return nil, errors.New("dir path is not a directory")
+		return nil, ErrNotDirectory
 	}
-	var environment Environment
+	environment := make(Environment)
 	entryes, err := os.ReadDir(dir)
 	for _, entry := range entryes {
 		if entry.IsDir() {
@@ -34,7 +37,40 @@ func ReadDir(dir string) (Environment, error) {
 		if strings.Contains(fileName, "=") {
 			continue
 		}
-
+		fileInfo, _ := os.Stat(entry.Name())
+		envValue := EnvValue{}
+		if fileInfo.Size() == 0 {
+			envValue.Value = ""
+			envValue.NeedRemove = true
+		} else {
+			value, err := valueFromFile(entry.Name())
+			if err != nil {
+				continue
+			}
+			envValue.Value = value
+			envValue.NeedRemove = false
+		}
+		environment[entry.Name()] = envValue
 	}
 	return environment, nil
+}
+
+func valueFromFile(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	reader := bufio.NewReader(file)
+	firstLine := []byte{}
+	for {
+		b, err := reader.ReadByte()
+		if err != nil {
+			return "", err
+		}
+		if b == 0x00 || b == '\n' {
+			break
+		}
+		firstLine = append(firstLine, b)
+	}
+	return string(firstLine), nil
 }
