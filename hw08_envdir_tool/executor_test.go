@@ -15,20 +15,22 @@ func TestRunCmd(t *testing.T) {
 	}{
 		{"run echo from testdata empty env", []string{
 			"/bin/bash",
-			"/home/muzhichkov_ra/Documents/Applications/hw-otus/hw08_envdir_tool/testdata/echo.sh",
+			"./testdata/echo.sh",
 			"arg1=1",
-			"arg2=2"}, Environment{}, 0},
+			"arg2=2"},
+			Environment{}, 0},
 		{"run echo from testdata with env", []string{
 			"/bin/bash",
-			"/home/muzhichkov_ra/Documents/Applications/hw-otus/hw08_envdir_tool/testdata/echo.sh",
+			"./testdata/echo.sh",
 			"arg1=1",
-			"arg2=2"}, Environment{
-			"BAR":   {"bar", false},
-			"EMPTY": {"", false},
-			"FOO":   {"   foo\nwith new line", false},
-			"HELLO": {"\"hello\"", false},
-			"UNSET": {"", true},
-		}, 0},
+			"arg2=2"},
+			Environment{
+				"BAR":   {"bar", false},
+				"EMPTY": {"", false},
+				"FOO":   {"   foo\nwith new line", false},
+				"HELLO": {"\"hello\"", false},
+				"UNSET": {"", true},
+			}, 0},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
