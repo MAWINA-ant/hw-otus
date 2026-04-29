@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -28,7 +31,7 @@ func ReadDir(dir string) (Environment, error) {
 		return nil, ErrNotDirectory
 	}
 	environment := make(Environment)
-	entryes, err := os.ReadDir(dir)
+	entryes, _ := os.ReadDir(dir)
 	for _, entry := range entryes {
 		if entry.IsDir() {
 			continue
@@ -37,14 +40,19 @@ func ReadDir(dir string) (Environment, error) {
 		if strings.Contains(fileName, "=") {
 			continue
 		}
-		fileInfo, _ := os.Stat(entry.Name())
+		fileInfo, err := entry.Info()
+		if err != nil {
+			fmt.Println("stat???? ", entry.Name(), err)
+			continue
+		}
 		envValue := EnvValue{}
 		if fileInfo.Size() == 0 {
 			envValue.Value = ""
 			envValue.NeedRemove = true
 		} else {
-			value, err := valueFromFile(entry.Name())
+			value, err := valueFromFile(filepath.Join(dir, entry.Name()))
 			if err != nil {
+				fmt.Println("Value from ", entry.Name())
 				continue
 			}
 			envValue.Value = value
@@ -58,19 +66,16 @@ func ReadDir(dir string) (Environment, error) {
 func valueFromFile(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
+		fmt.Println("not open")
 		return "", err
 	}
-	reader := bufio.NewReader(file)
-	firstLine := []byte{}
-	for {
-		b, err := reader.ReadByte()
-		if err != nil {
-			return "", err
-		}
-		if b == 0x00 || b == '\n' {
-			break
-		}
-		firstLine = append(firstLine, b)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var firstLine string
+	if scanner.Scan() {
+		firstLine = scanner.Text()
 	}
-	return string(firstLine), nil
+	firstLineBytes := bytes.ReplaceAll([]byte(firstLine), []byte("\x00"), []byte("\n"))
+	firstLine = strings.TrimRight(string(firstLineBytes), " \t")
+	return firstLine, nil
 }
