@@ -16,5 +16,5 @@ func main() {
 		fmt.Println("error while reading env directory. ", err)
 		os.Exit(1)
 	}
-	os.Exit(RunCmd(args[1:], environment))
+	os.Exit(RunCmd(args[2:], environment))
 }
