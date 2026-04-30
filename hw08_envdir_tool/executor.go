@@ -18,10 +18,8 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 				continue
 			}
 			os.Setenv(k, v.Value)
-		} else {
-			if !v.NeedRemove {
-				os.Setenv(k, v.Value)
-			}
+		} else if !v.NeedRemove {
+			os.Setenv(k, v.Value)
 		}
 	}
 	command.Env = os.Environ()
