@@ -34,6 +34,11 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	NamedResponse struct {
+		Name string
+		Resp Response `validate:"nested"`
+	}
 )
 
 func TestValidate(t *testing.T) {
