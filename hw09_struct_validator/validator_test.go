@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -47,7 +49,8 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in:          Response{Code: 400},
+			expectedErr: ValidationErrors{ValidationError{Field: "Code", Err: fmt.Errorf("\"in\" rule is not fulfilled")}},
 		},
 		// ...
 		// Place your code here.
@@ -58,7 +61,8 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
+			err := Validate(tt.in)
+			require.Equal(t, tt.expectedErr, err)
 			_ = tt
 		})
 	}
