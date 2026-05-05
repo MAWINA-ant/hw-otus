@@ -49,11 +49,69 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			in:          Response{Code: 400},
-			expectedErr: ValidationErrors{ValidationError{Field: "Code", Err: fmt.Errorf("\"in\" rule is not fulfilled")}},
+			in: Token{
+				Header:    []byte("fdsafd"),
+				Payload:   []byte("fdscxzvvcxzafd"),
+				Signature: []byte("34243243234"),
+			},
+			expectedErr: nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			in: User{
+				ID:     "qwertyuiopasdfghjklzxcvbnm1234567890",
+				Name:   "Ruslan",
+				Age:    12,
+				Email:  "cfadsfasd@fdadsa.com",
+				Role:   "developer",
+				Phones: []string{"89159532200", "845612365462"},
+				meta:   json.RawMessage{},
+			},
+			expectedErr: ValidationErrors{
+				CreateValidationError("Age", "min"),
+				CreateValidationError("Role", "in"),
+				CreateValidationError("Phones", "len"),
+			},
+		},
+		{
+			in: Response{
+				Code: 400,
+			},
+			expectedErr: ValidationErrors{
+				CreateValidationError("Code", "in"),
+			},
+		},
+		{
+			in: User{
+				ID:     "qwertyuiopasdfghjklzxcvbnm1234567890",
+				Name:   "Ruslan",
+				Age:    25,
+				Email:  "cfadsfasd@fdadsa.com",
+				Role:   "stuff",
+				Phones: []string{"89159532200", "84561236546"},
+				meta:   json.RawMessage{},
+			},
+			expectedErr: nil,
+		},
+		{
+			in: App{
+				Version: "1234567",
+			},
+			expectedErr: ValidationErrors{
+				CreateValidationError("Version", "len"),
+			},
+		},
+		{
+			in: NamedResponse{
+				Name: "BlaBlaBla",
+				Resp: Response{
+					Code: 401,
+					Body: "foobar",
+				},
+			},
+			expectedErr: ValidationErrors{
+				CreateValidationError("Code", "in"),
+			},
+		},
 	}
 
 	for i, tt := range tests {

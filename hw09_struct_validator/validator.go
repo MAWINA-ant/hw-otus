@@ -16,6 +16,11 @@ type ValidationError struct {
 	Err   error
 }
 
+func CreateValidationError(field, rule string) ValidationError {
+	err := fmt.Errorf("\"%s\" rule is not fulfilled", rule)
+	return ValidationError{Field: field, Err: err}
+}
+
 type ValidationErrors []ValidationError
 
 func (v ValidationErrors) Error() string {
@@ -23,31 +28,42 @@ func (v ValidationErrors) Error() string {
 }
 
 func Validate(v interface{}) error {
+	err := validate(reflect.ValueOf(v))
+	if err != nil {
+		if errors.As(err, &ValidationErrors{}) {
+			validateErr, _ := err.(ValidationErrors)
+			return validateErr
+		}
+		return err
+	}
+	return nil
+}
+
+func validate(reflectValue reflect.Value) error {
 	var validationErrors ValidationErrors
-	reflectValue := reflect.ValueOf(v)
 	reflectType := reflectValue.Type()
-	if reflectValue.Kind() == reflect.Ptr {
+	if reflectValue.Kind() == reflect.Pointer {
 		reflectValue = reflectValue.Elem()
 		reflectType = reflectType.Elem()
 	}
 	if reflectType.Kind() == reflect.Struct {
 		fieldCount := reflectType.NumField()
 		for i := range fieldCount {
-			field := reflectType.Field(i)
+			fieldType := reflectType.Field(i)
+			fieldValue := reflectValue.Field(i)
+
 			// проверка на публичность поля структуры
-			if field.PkgPath != "" {
+			if fieldType.PkgPath != "" {
 				continue
 			}
-			tag := field.Tag.Get("validate")
+			tag := fieldType.Tag.Get("validate")
 			// проверка на наличие правил "validate"
 			if tag == "" || tag == "-" {
 				continue
 			}
-			fieldName := field.Name
-			fieldType := field.Type
-			fieldValue := reflectValue.Field(i)
+			fieldName := fieldType.Name
 			var err error
-			switch fieldType.Kind() {
+			switch fieldValue.Kind() {
 			case reflect.String:
 				err = ValidateString(fieldName, fieldValue.String(), tag)
 			case reflect.Int:
@@ -55,33 +71,31 @@ func Validate(v interface{}) error {
 			case reflect.Slice:
 				sliceSize := fieldValue.Len()
 				for i := range sliceSize {
-					switch field.Type.Elem().Kind() {
+					switch fieldType.Type.Elem().Kind() {
 					case reflect.String:
 						err = ValidateString(fieldName, fieldValue.Index(i).String(), tag)
 					case reflect.Int:
 						err = ValidateInteger(fieldName, int(fieldValue.Index(i).Int()), tag)
 					}
 					if err != nil {
-						var validateErr ValidationErrors
-						if errors.Is(err, validateErr) {
-							validateErr, _ = err.(ValidationErrors)
-							validationErrors = append(validationErrors, validateErr...)
-						}
-						return err
+						break
 					}
 				}
 			case reflect.Struct:
-				err = Validate(fieldValue)
+				err = validate(fieldValue)
 			}
 			if err != nil {
-				var validateErr ValidationErrors
-				if errors.Is(err, validateErr) {
-					validateErr, _ = err.(ValidationErrors)
+				if errors.As(err, &ValidationErrors{}) {
+					validateErr, _ := err.(ValidationErrors)
 					validationErrors = append(validationErrors, validateErr...)
+					continue
 				}
 				return err
 			}
 		}
+	}
+	if len(validationErrors) == 0 {
+		return nil
 	}
 	return validationErrors
 }
@@ -104,17 +118,17 @@ func ValidateString(fieldName string, value string, tagValue string) error {
 			}
 			runeCount := utf8.RuneCountInString(value)
 			if runeCount != ruleValueInt {
-				validationErrors = append(validationErrors, ValidationError{Field: fieldName, Err: fmt.Errorf("\"len\" rule is not fulfilled")})
+				validationErrors = append(validationErrors, CreateValidationError(fieldName, ruleName))
 			}
 		case "regexp":
 			re := regexp.MustCompile(ruleValue)
 			if !re.MatchString(value) {
-				validationErrors = append(validationErrors, ValidationError{Field: fieldName, Err: fmt.Errorf("\"regexp\" rule is not fulfilled")})
+				validationErrors = append(validationErrors, CreateValidationError(fieldName, ruleName))
 			}
 		case "in":
 			ruleValueSlice := strings.Split(ruleValue, ",")
 			if !slices.Contains(ruleValueSlice, value) {
-				validationErrors = append(validationErrors, ValidationError{Field: fieldName, Err: fmt.Errorf("\"in\" rule is not fulfilled")})
+				validationErrors = append(validationErrors, CreateValidationError(fieldName, ruleName))
 			}
 		}
 	}
@@ -141,7 +155,7 @@ func ValidateInteger(fieldName string, value int, tagValue string) error {
 				return fmt.Errorf("couldn't parse \"min\" rule value to int")
 			}
 			if value < ruleValueInt {
-				validationErrors = append(validationErrors, ValidationError{Field: fieldName, Err: fmt.Errorf("\"min\" rule is not fulfilled")})
+				validationErrors = append(validationErrors, CreateValidationError(fieldName, ruleName))
 			}
 		case "max":
 			ruleValueInt, err := strconv.Atoi(ruleValue)
@@ -149,7 +163,7 @@ func ValidateInteger(fieldName string, value int, tagValue string) error {
 				return fmt.Errorf("couldn't parse \"max\" rule value to int")
 			}
 			if value > ruleValueInt {
-				validationErrors = append(validationErrors, ValidationError{Field: fieldName, Err: fmt.Errorf("\"max\" rule is not fulfilled")})
+				validationErrors = append(validationErrors, CreateValidationError(fieldName, ruleName))
 			}
 		case "in":
 			ruleValueSlice := strings.Split(ruleValue, ",")
@@ -162,7 +176,7 @@ func ValidateInteger(fieldName string, value int, tagValue string) error {
 					break
 				}
 			}
-			validationErrors = append(validationErrors, ValidationError{Field: fieldName, Err: fmt.Errorf("\"in\" rule is not fulfilled")})
+			validationErrors = append(validationErrors, CreateValidationError(fieldName, ruleName))
 		}
 	}
 	if len(validationErrors) == 0 {
