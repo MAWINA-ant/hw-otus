@@ -24,16 +24,20 @@ func CreateValidationError(field, rule string) ValidationError {
 type ValidationErrors []ValidationError
 
 func (v ValidationErrors) Error() string {
-	panic("implement me")
+	errorStrign := ""
+	if len(v) > 0 {
+		errorStringSlice := make([]string, len(v))
+		for i, e := range v {
+			errorStringSlice[i] = fmt.Sprintf("field is %s and error is %s", e.Field, e.Err)
+		}
+		errorStrign = strings.Join(errorStringSlice, "; ")
+	}
+	panic(errorStrign)
 }
 
 func Validate(v interface{}) error {
 	err := validate(reflect.ValueOf(v))
 	if err != nil {
-		if errors.As(err, &ValidationErrors{}) {
-			validateErr, _ := err.(ValidationErrors)
-			return validateErr
-		}
 		return err
 	}
 	return nil
@@ -46,7 +50,7 @@ func validate(reflectValue reflect.Value) error {
 		reflectValue = reflectValue.Elem()
 		reflectType = reflectType.Elem()
 	}
-	if reflectType.Kind() == reflect.Struct {
+	if reflectType.Kind() == reflect.Struct { //nolint:nestif
 		fieldCount := reflectType.NumField()
 		for i := range fieldCount {
 			fieldType := reflectType.Field(i)
@@ -61,33 +65,13 @@ func validate(reflectValue reflect.Value) error {
 			if tag == "" || tag == "-" {
 				continue
 			}
-			fieldName := fieldType.Name
-			var err error
-			switch fieldValue.Kind() {
-			case reflect.String:
-				err = ValidateString(fieldName, fieldValue.String(), tag)
-			case reflect.Int:
-				err = ValidateInteger(fieldName, int(fieldValue.Int()), tag)
-			case reflect.Slice:
-				sliceSize := fieldValue.Len()
-				for i := range sliceSize {
-					switch fieldType.Type.Elem().Kind() {
-					case reflect.String:
-						err = ValidateString(fieldName, fieldValue.Index(i).String(), tag)
-					case reflect.Int:
-						err = ValidateInteger(fieldName, int(fieldValue.Index(i).Int()), tag)
-					}
-					if err != nil {
-						break
-					}
-				}
-			case reflect.Struct:
-				err = validate(fieldValue)
-			}
+			err := validateField(fieldType, fieldValue, tag)
 			if err != nil {
 				if errors.As(err, &ValidationErrors{}) {
-					validateErr, _ := err.(ValidationErrors)
-					validationErrors = append(validationErrors, validateErr...)
+					var validateErr ValidationErrors
+					if errors.As(err, &validateErr) {
+						validationErrors = append(validationErrors, validateErr...)
+					}
 					continue
 				}
 				return err
@@ -100,7 +84,34 @@ func validate(reflectValue reflect.Value) error {
 	return validationErrors
 }
 
-func ValidateString(fieldName string, value string, tagValue string) error {
+func validateField(fieldType reflect.StructField, fieldValue reflect.Value, tagValue string) error {
+	fieldName := fieldType.Name
+	var err error
+	switch fieldValue.Kind() { //nolint:exhaustive
+	case reflect.String:
+		err = validateString(fieldName, fieldValue.String(), tagValue)
+	case reflect.Int:
+		err = validateInteger(fieldName, int(fieldValue.Int()), tagValue)
+	case reflect.Slice:
+		sliceSize := fieldValue.Len()
+		for i := range sliceSize {
+			switch fieldType.Type.Elem().Kind() { //nolint:exhaustive
+			case reflect.String:
+				err = validateString(fieldName, fieldValue.Index(i).String(), tagValue)
+			case reflect.Int:
+				err = validateInteger(fieldName, int(fieldValue.Index(i).Int()), tagValue)
+			}
+			if err != nil {
+				break
+			}
+		}
+	case reflect.Struct:
+		err = validate(fieldValue)
+	}
+	return err
+}
+
+func validateString(fieldName string, value string, tagValue string) error {
 	var validationErrors ValidationErrors
 	rules := strings.Split(tagValue, "|")
 	for _, rule := range rules {
@@ -138,7 +149,7 @@ func ValidateString(fieldName string, value string, tagValue string) error {
 	return validationErrors
 }
 
-func ValidateInteger(fieldName string, value int, tagValue string) error {
+func validateInteger(fieldName string, value int, tagValue string) error {
 	var validationErrors ValidationErrors
 	rules := strings.Split(tagValue, "|")
 	for _, rule := range rules {
