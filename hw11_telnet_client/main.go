@@ -3,32 +3,84 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
+	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 )
 
-var ErrorFewArguments = errors.New("not enougth arguments")
-var ErrorBadArguments = errors.New("incorrect arguments")
+var ErrorIncorrectUsage = errors.New("usage: go-telnet [--timeout=10s] host port")
+var ErrorInterruptSignal = errors.New("Bye-bye")
 
 func main() {
-	args := os.Args
-	if len(args) < 3 {
-		fmt.Println(ErrorFewArguments)
+	timeout := 10 * time.Second
+	var host string
+
+	if len(os.Args) < 2 {
+		fmt.Println(ErrorIncorrectUsage)
 		os.Exit(1)
 	}
-	t, _ := time.ParseDuration("10s")
-	if strings.Contains(args[1], "--timeout=") {
-		if len(args) < 4 {
-			fmt.Println(ErrorBadArguments)
+
+	args := os.Args[1:]
+	if after, ok := strings.CutPrefix(args[0], "--timeout="); ok {
+		t, _ := time.ParseDuration(after)
+		timeout = t
+		args = args[1:]
+	}
+
+	if len(args) < 2 {
+		fmt.Println(ErrorIncorrectUsage)
+		os.Exit(1)
+	}
+
+	host = net.JoinHostPort(args[0], args[1])
+
+	telnetClient := NewTelnetClient(host, timeout, os.Stdin, os.Stdout)
+
+	if err := telnetClient.Connect(); err != nil {
+		fmt.Println("Connection error:", err)
+		os.Exit(1)
+	}
+	defer telnetClient.Close()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT)
+
+	errChan := make(chan error, 1)
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		err := telnetClient.Send()
+		if err == io.EOF {
+			fmt.Println(ErrorInterruptSignal)
+			telnetClient.Close()
+			os.Exit(0)
+		}
+		errChan <- err
+	}()
+
+	go func() {
+		defer wg.Done()
+		errChan <- telnetClient.Receive()
+	}()
+
+	select {
+	case err := <-errChan:
+		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
-		t, _ = time.ParseDuration(strings.ReplaceAll(args[1], "--timeout=", ""))
+	case <-sigChan:
+		fmt.Println(ErrorInterruptSignal)
+		telnetClient.Close()
+		os.Exit(0)
 	}
-	host := strings.Join(args[2:4], ":")
-	telnetClient := NewTelnetClient(host, t, os.Stdout, os.Stdin)
-	telnetClient.Connect()
 
-	// Place your code here,
-	// P.S. Do not rush to throw context down, think think if it is useful with blocking operation?
+	wg.Wait()
 }

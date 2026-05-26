@@ -41,21 +41,18 @@ func (t *TelnetStruct) Connect() error {
 }
 
 func (t *TelnetStruct) Close() error {
-	return t.Close()
+	if t.con != nil {
+		return t.con.Close()
+	}
+	return nil
 }
 
 func (t *TelnetStruct) Send() error {
 	_, err := io.Copy(t.con, t.in)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (t *TelnetStruct) Receive() error {
 	_, err := io.Copy(t.out, t.con)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
