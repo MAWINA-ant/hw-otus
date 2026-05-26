@@ -13,8 +13,10 @@ import (
 	"time"
 )
 
-var ErrorIncorrectUsage = errors.New("usage: go-telnet [--timeout=10s] host port")
-var ErrorInterruptSignal = errors.New("Bye-bye")
+var (
+	ErrorIncorrectUsage  = errors.New("usage: go-telnet [--timeout=10s] host port")
+	ErrorInterruptSignal = errors.New("Bye-bye")
+)
 
 func main() {
 	timeout := 10 * time.Second
@@ -56,13 +58,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		err := telnetClient.Send()
-		if err == io.EOF {
-			fmt.Println(ErrorInterruptSignal)
-			telnetClient.Close()
-			os.Exit(0)
-		}
-		errChan <- err
+		errChan <- telnetClient.Send()
 	}()
 
 	go func() {
@@ -74,6 +70,10 @@ func main() {
 	case err := <-errChan:
 		if err != nil {
 			fmt.Println(err)
+			telnetClient.Close()
+			if errors.Is(io.EOF, err) {
+				os.Exit(0)
+			}
 			os.Exit(1)
 		}
 	case <-sigChan:
