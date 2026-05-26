@@ -47,7 +47,6 @@ func main() {
 		fmt.Println("Connection error:", err)
 		os.Exit(1)
 	}
-	defer telnetClient.Close()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT)
@@ -71,7 +70,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 			telnetClient.Close()
-			if errors.Is(io.EOF, err) {
+			if errors.Is(err, io.EOF) {
 				os.Exit(0)
 			}
 			os.Exit(1)
@@ -83,4 +82,5 @@ func main() {
 	}
 
 	wg.Wait()
+	telnetClient.Close()
 }
