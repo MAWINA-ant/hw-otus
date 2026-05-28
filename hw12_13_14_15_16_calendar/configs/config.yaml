@@ -1,5 +1,11 @@
-[logger]
-level = "INFO"
+logger:
+  level: "INFO"
 
-# TODO
-# ...
+storage:
+  host: ""
+  user: "username"
+  password: "pass"
+
+server:
+  host: "127.0.0.1"
+  port: 12345
