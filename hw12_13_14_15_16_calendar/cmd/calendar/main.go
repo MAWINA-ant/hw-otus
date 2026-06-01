@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,6 +30,10 @@ func main() {
 	}
 
 	config := NewConfig()
+	if err := config.ParseConfigFromFile(configFile); err != nil {
+		fmt.Printf("Couldn't parse config file %s cause %s", configFile, err)
+		os.Exit(1)
+	}
 	logg := logger.New(config.Logger.Level)
 
 	storage := memorystorage.New()

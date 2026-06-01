@@ -3,8 +3,9 @@ logger:
 
 storage:
   host: ""
+  database: "databasename"
   user: "username"
-  password: "pass"
+  password: "password"
 
 server:
   host: "127.0.0.1"
