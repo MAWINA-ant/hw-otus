@@ -1,7 +1,9 @@
 logger:
   level: "INFO"
+  file: "/var/log/calendar.txt"
 
 storage:
+  in-memory: true
   host: ""
   database: "databasename"
   user: "username"

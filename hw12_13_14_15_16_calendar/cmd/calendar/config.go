@@ -16,10 +16,12 @@ type Config struct {
 }
 
 type LoggerConf struct {
-	Level string `yaml:"level"`
+	Level   string `yaml:"level"`
+	LogFile string `yaml:"file"`
 }
 
 type StorageConf struct {
+	InMemory bool   `yaml:"in-memory"`
 	Host     string `yaml:"host"`
 	DataBase string `yaml:"database"`
 	User     string `yaml:"user"`

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/app"
-	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger"
+	internallogger "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
 )
@@ -34,7 +34,7 @@ func main() {
 		fmt.Printf("Couldn't parse config file %s cause %s", configFile, err)
 		os.Exit(1)
 	}
-	logg := logger.New(config.Logger.Level)
+	logg := internallogger.New(config.Logger.Level, config.Logger.LogFile)
 
 	storage := memorystorage.New()
 	calendar := app.New(logg, storage)

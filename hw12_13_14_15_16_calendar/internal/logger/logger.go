@@ -10,7 +10,7 @@ type Logger struct {
 	logrusLogger *logrus.Logger
 }
 
-func New(level string) *Logger {
+func New(level, logfile string) *Logger {
 	log := logrus.New()
 	switch strings.ToLower(level) {
 	case "error":
