@@ -49,3 +49,15 @@ func (a *App) EditEvent(ctx context.Context, id, title string) error {
 func (a *App) RemoveEvent(ctx context.Context, id string) error {
 	return a.storage.RemoveEvent(id)
 }
+
+func (a *App) DayEvents(ctx context.Context, d time.Time) ([]storage.Event, error) {
+	return a.storage.DayEvents(d)
+}
+
+func (a *App) WeekEvents(ctx context.Context, d time.Time) ([]storage.Event, error) {
+	return a.storage.WeekEvents(d)
+}
+
+func (a *App) MonthEvents(ctx context.Context, d time.Time) ([]storage.Event, error) {
+	return a.storage.MonthEvents(d)
+}
