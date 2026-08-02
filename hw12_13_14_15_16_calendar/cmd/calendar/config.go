@@ -3,34 +3,34 @@ package main
 import (
 	"os"
 
-	"go.yaml.in/yaml/v3"
+	"github.com/BurntSushi/toml"
 )
 
 // При желании конфигурацию можно вынести в internal/config.
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger  LoggerConf  `yaml:"logger"`
-	Storage StorageConf `yaml:"storage"`
-	Server  ServerConf  `yaml:"server"`
+	Logger  LoggerConf  `toml:"logger"`
+	Storage StorageConf `toml:"storage"`
+	Server  ServerConf  `toml:"server"`
 }
 
 type LoggerConf struct {
-	Level   string `yaml:"level"`
-	LogFile string `yaml:"file"`
+	Level   string `toml:"level"`
+	LogFile string `toml:"file"`
 }
 
 type StorageConf struct {
-	InMemory bool   `yaml:"in-memory"`
-	Host     string `yaml:"host"`
-	DataBase string `yaml:"database"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
+	InMemory bool   `toml:"in-memory"`
+	Host     string `toml:"host"`
+	DataBase string `toml:"database"`
+	User     string `toml:"user"`
+	Password string `toml:"password"`
 }
 
 type ServerConf struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host string `toml:"host"`
+	Port int    `toml:"port"`
 }
 
 func NewConfig() Config {
@@ -43,7 +43,7 @@ func (c *Config) ParseConfigFromFile(path string) error {
 	if err != nil {
 		return err
 	}
-	err = yaml.Unmarshal(data, c)
+	err = toml.Unmarshal(data, c)
 	if err != nil {
 		return err
 	}

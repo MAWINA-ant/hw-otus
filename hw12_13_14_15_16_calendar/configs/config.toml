@@ -1,0 +1,16 @@
+title = "calendar service"
+
+[logger]
+level = "INFO"
+file = "/var/log/calendar.txt"
+
+[storage]
+in-memory = true
+host = ""
+database = "databasename"
+user = "username"
+password = "password"
+
+[server]
+host = "127.0.0.1"
+port = 12345
