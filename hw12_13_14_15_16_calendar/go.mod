@@ -7,4 +7,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4
 )
 
-require golang.org/x/sys v0.13.0 // indirect
+require (
+	github.com/google/uuid v1.6.0
+	golang.org/x/sys v0.13.0 // indirect
+)

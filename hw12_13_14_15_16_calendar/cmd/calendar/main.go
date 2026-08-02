@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -29,14 +30,21 @@ func main() {
 		return
 	}
 
+	// конфигурация
 	config := NewConfig()
-	if err := config.ParseConfigFromFile(configFile); err != nil {
+	absConfigFilePath, _ := filepath.Abs(configFile)
+	if err := config.ParseConfigFromFile(absConfigFilePath); err != nil {
 		fmt.Printf("Couldn't parse config file %s cause %s", configFile, err)
 		os.Exit(1)
 	}
+
+	// логгер
 	logg := internallogger.New(config.Logger.Level, config.Logger.LogFile)
 
+	// хранилище
 	storage := memorystorage.New()
+
+	// приложение
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(logg, calendar)

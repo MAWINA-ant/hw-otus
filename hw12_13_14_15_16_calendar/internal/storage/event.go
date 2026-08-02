@@ -3,6 +3,8 @@ package storage
 import (
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -13,7 +15,7 @@ var (
 )
 
 type Event struct {
-	ID          string
+	ID          uuid.UUID
 	Title       string
 	DateTime    time.Time
 	Duration    time.Duration
@@ -21,4 +23,3 @@ type Event struct {
 	UserID      string
 	NotifyTime  time.Time
 }
-

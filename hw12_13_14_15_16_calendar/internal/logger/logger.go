@@ -1,13 +1,15 @@
 package logger
 
 import (
+	"io"
+	"os"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 )
 
 type Logger struct {
-	logrusLogger *logrus.Logger
+	logrus.Logger
 }
 
 func New(level, logfile string) *Logger {
@@ -22,21 +24,16 @@ func New(level, logfile string) *Logger {
 	case "trace":
 		log.SetLevel(logrus.TraceLevel)
 	}
-	return &Logger{logrusLogger: log}
-}
-
-func (l Logger) Error(msg string) {
-	l.logrusLogger.Error(msg)
-}
-
-func (l Logger) Warn(msg string) {
-	l.logrusLogger.Warn(msg)
-}
-
-func (l Logger) Info(msg string) {
-	l.logrusLogger.Info(msg)
-}
-
-func (l Logger) Debug(msg string) {
-	l.logrusLogger.Debug(msg)
+	if logfile != "" {
+		file, err := os.OpenFile(logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Errorf("couldn't use log file %s", logfile)
+		} else {
+			multiWriter := io.MultiWriter(os.Stdout, file)
+			log.SetOutput(multiWriter)
+			log.SetFormatter(&logrus.JSONFormatter{})
+		}
+		defer file.Close()
+	}
+	return &Logger{}
 }
