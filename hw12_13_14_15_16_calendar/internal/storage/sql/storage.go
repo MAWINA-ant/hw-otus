@@ -26,22 +26,18 @@ func (s *Storage) Close(ctx context.Context) error {
 }
 
 func (s *Storage) CreateEvent(e *storage.Event) error {
-
 	return nil
 }
 
 func (s *Storage) EditEvent(id uuid.UUID, e *storage.Event) error {
-
 	return nil
 }
 
 func (s *Storage) RemoveEvent(id uuid.UUID) error {
-
 	return nil
 }
 
 func (s *Storage) DayEvents(d time.Time) ([]*storage.Event, error) {
-
 	return nil, nil
 }
 
