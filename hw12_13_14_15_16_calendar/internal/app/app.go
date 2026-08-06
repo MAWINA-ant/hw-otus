@@ -24,9 +24,9 @@ type Storage interface {
 	CreateEvent(e *storage.Event) error
 	EditEvent(ID uuid.UUID, e *storage.Event) error
 	RemoveEvent(ID uuid.UUID) error
-	DayEvents(d time.Time) ([]storage.Event, error)
-	WeekEvents(d time.Time) ([]storage.Event, error)
-	MonthEvents(d time.Time) ([]storage.Event, error)
+	DayEvents(d time.Time) ([]*storage.Event, error)
+	WeekEvents(d time.Time) ([]*storage.Event, error)
+	MonthEvents(d time.Time) ([]*storage.Event, error)
 }
 
 func New(logger Logger, storage Storage) *App {
@@ -51,14 +51,14 @@ func (a *App) RemoveEvent(ctx context.Context, id uuid.UUID) error {
 	return a.storage.RemoveEvent(id)
 }
 
-func (a *App) DayEvents(ctx context.Context, d time.Time) ([]storage.Event, error) {
+func (a *App) DayEvents(ctx context.Context, d time.Time) ([]*storage.Event, error) {
 	return a.storage.DayEvents(d)
 }
 
-func (a *App) WeekEvents(ctx context.Context, d time.Time) ([]storage.Event, error) {
+func (a *App) WeekEvents(ctx context.Context, d time.Time) ([]*storage.Event, error) {
 	return a.storage.WeekEvents(d)
 }
 
-func (a *App) MonthEvents(ctx context.Context, d time.Time) ([]storage.Event, error) {
+func (a *App) MonthEvents(ctx context.Context, d time.Time) ([]*storage.Event, error) {
 	return a.storage.MonthEvents(d)
 }

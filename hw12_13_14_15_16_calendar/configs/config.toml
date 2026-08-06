@@ -2,7 +2,7 @@ title = "calendar service"
 
 [logger]
 level = "INFO"
-file = "/var/log/calendar.txt"
+file = "~/logs/calendar.txt"
 
 [storage]
 in-memory = true
