@@ -17,12 +17,26 @@ linters-settings:
         allow:
           - $gostd
           - github.com/cheggaaa/pb/v3
+          - github.com/BurntSushi/toml
+          - github.com/jackc/pgx/stdlib
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/app
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/http
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/sql
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory
+          - github.com/google/uuid
+          - github.com/sirupsen/logrus
       Test:
         files:
           - $test
         allow:
           - $gostd
           - github.com/stretchr/testify
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory
+          - github.com/google/uuid
+          - github.com/sirupsen/logrus
 issues:
   exclude-rules:
     - path: _test\.go
