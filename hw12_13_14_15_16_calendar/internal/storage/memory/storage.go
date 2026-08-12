@@ -1,6 +1,7 @@
 package memorystorage
 
 import (
+	"context"
 	"slices"
 	"sort"
 	"sync"
@@ -16,7 +17,7 @@ type kv struct {
 }
 
 type Storage struct {
-	mu          sync.RWMutex //nolint:unused
+	mu          sync.RWMutex
 	eventMap    map[uuid.UUID]*storage.Event
 	sortedUUIDs []kv
 }
@@ -29,7 +30,7 @@ func New() *Storage {
 	}
 }
 
-func (s *Storage) CreateEvent(e *storage.Event) error {
+func (s *Storage) CreateEvent(_ context.Context, e *storage.Event) error { //lint:unused
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	idx := slices.IndexFunc(s.sortedUUIDs, func(pair kv) bool {
@@ -46,27 +47,27 @@ func (s *Storage) CreateEvent(e *storage.Event) error {
 	return nil
 }
 
-func (s *Storage) EditEvent(id uuid.UUID, e *storage.Event) error {
+func (s *Storage) EditEvent(_ context.Context, id uuid.UUID, e *storage.Event) error { //lint:unused
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.eventMap[id]; !ok {
-		return storage.ErrIdNotFound
+		return storage.ErrIDNotFound
 	}
 	s.eventMap[e.ID] = e
 	return nil
 }
 
-func (s *Storage) RemoveEvent(id uuid.UUID) error {
+func (s *Storage) RemoveEvent(_ context.Context, id uuid.UUID) error { //lint:unused
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.eventMap[id]; !ok {
-		return storage.ErrIdNotFound
+		return storage.ErrIDNotFound
 	}
 	delete(s.eventMap, id)
 	return nil
 }
 
-func (s *Storage) DayEvents(d time.Time) ([]*storage.Event, error) {
+func (s *Storage) DayEvents(_ context.Context, d time.Time) ([]*storage.Event, error) { //lint:unused
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	year, month, day := d.Date()
@@ -82,7 +83,7 @@ func (s *Storage) DayEvents(d time.Time) ([]*storage.Event, error) {
 	return result, nil
 }
 
-func (s *Storage) WeekEvents(d time.Time) ([]*storage.Event, error) {
+func (s *Storage) WeekEvents(_ context.Context, d time.Time) ([]*storage.Event, error) { //lint:unused
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	year, month, day := d.Date()
@@ -98,7 +99,7 @@ func (s *Storage) WeekEvents(d time.Time) ([]*storage.Event, error) {
 	return result, nil
 }
 
-func (s *Storage) MonthEvents(d time.Time) ([]*storage.Event, error) {
+func (s *Storage) MonthEvents(_ context.Context, d time.Time) ([]*storage.Event, error) { //lint:unused
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	year, month, day := d.Date()

@@ -49,7 +49,7 @@ func main() {
 	} else {
 		ctx := context.Background()
 		sqlStorage := sqlstorage.New()
-		sqlStorage.Connect(ctx)
+		sqlStorage.ConnectWithConfig(ctx, sqlstorage.StorageConfig(config.SQLStorage))
 		defer sqlStorage.Close(ctx)
 		calendar = app.New(logg, sqlStorage)
 	}

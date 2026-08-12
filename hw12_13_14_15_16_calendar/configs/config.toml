@@ -6,6 +6,8 @@ file = "~/logs/calendar.txt"
 
 [storage]
 in-memory = true
+
+[sql_storage]
 host = ""
 database = "databasename"
 user = "username"

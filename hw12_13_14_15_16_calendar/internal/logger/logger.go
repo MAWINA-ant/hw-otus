@@ -29,12 +29,11 @@ func New(level, logfile string) *Logger {
 	if logfile != "" {
 		correctFilePath := correctPath(logfile)
 		dir := filepath.Dir(correctFilePath)
-		if _, err := os.Stat(dir); os.IsNotExist(err) {
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				log.Errorf("couldn't create directory %s, %s", dir, err)
-			}
+		err := os.MkdirAll(dir, 0o755)
+		if err != nil {
+			log.Errorf("couldn't create directory %s, %s", dir, err)
 		}
-		file, err := os.OpenFile(correctFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err := os.OpenFile(correctFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
 		if err != nil {
 			log.Errorf("couldn't use log file %s, %s", logfile, err)
 		} else {

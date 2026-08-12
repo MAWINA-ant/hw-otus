@@ -66,7 +66,7 @@ func (s *Server) Start(ctx context.Context) error {
 	mux.HandleFunc("/", s.helloHandler)
 	mux.HandleFunc("/hello", s.helloHandler)
 
-	handler := s.loggingMiddleware(mux)
+	handler := loggingMiddleware(mux, s.logger)
 
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
 
@@ -116,37 +116,7 @@ func (s *Server) helloHandler(w http.ResponseWriter, r *http.Request) {
 	response := fmt.Sprintf("Hello, %s!", name)
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, response)
-}
-
-func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		wrapped := &responseWriter{
-			ResponseWriter: w,
-			statusCode:     http.StatusOK,
-		}
-
-		next.ServeHTTP(wrapped, r)
-
-		latency := time.Since(start)
-		ip := getClientIP(r)
-
-		logLine := fmt.Sprintf("%s [%s] %s %s %s %d %d \"%s\"",
-			ip,
-			start.Format("02/Jan/2006:15:04:05 -0700"),
-			r.Method,
-			r.URL.String(),
-			r.Proto,
-			wrapped.statusCode,
-			latency.Milliseconds(),
-			r.UserAgent(),
-		)
-
-		// Используем переданный логгер
-		s.logger.Info(logLine)
-	})
+	fmt.Fprint(w, response) // #nosec G705
 }
 
 func getClientIP(r *http.Request) string {
@@ -169,7 +139,6 @@ func getClientIP(r *http.Request) string {
 	return host
 }
 
-// responseWriter обертка для ResponseWriter для захвата статуса
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int

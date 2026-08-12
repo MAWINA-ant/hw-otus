@@ -10,9 +10,10 @@ import (
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger  LoggerConf  `toml:"logger"`
-	Storage StorageConf `toml:"storage"`
-	Server  ServerConf  `toml:"server"`
+	Logger     LoggerConf     `toml:"logger"`
+	Storage    StorageConf    `toml:"storage"`
+	SQLStorage SQLStorageConf `toml:"sql_storage"`
+	Server     ServerConf     `toml:"server"`
 }
 
 type LoggerConf struct {
@@ -21,7 +22,10 @@ type LoggerConf struct {
 }
 
 type StorageConf struct {
-	InMemory bool   `toml:"in-memory"`
+	InMemory bool `toml:"in-memory"`
+}
+
+type SQLStorageConf struct {
 	Host     string `toml:"host"`
 	DataBase string `toml:"database"`
 	User     string `toml:"user"`
