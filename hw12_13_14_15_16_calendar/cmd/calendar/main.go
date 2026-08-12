@@ -39,13 +39,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// логгер
 	logg := internallogger.New(config.Logger.Level, config.Logger.LogFile)
+	defer logg.Close()
 
-	// приложение
 	var calendar *app.App
-
-	// хранилище
 	if config.Storage.InMemory {
 		memoryStorage := memorystorage.New()
 		calendar = app.New(logg, memoryStorage)
@@ -57,7 +54,7 @@ func main() {
 		calendar = app.New(logg, sqlStorage)
 	}
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServerWithConfig(logg, calendar, internalhttp.ServerConfig(config.Server))
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

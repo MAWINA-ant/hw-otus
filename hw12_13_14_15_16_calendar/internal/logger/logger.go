@@ -11,6 +11,7 @@ import (
 
 type Logger struct {
 	logrus.Logger
+	file *os.File
 }
 
 func New(level, logfile string) *Logger {
@@ -41,9 +42,15 @@ func New(level, logfile string) *Logger {
 			log.SetOutput(multiWriter)
 			log.SetFormatter(&logrus.JSONFormatter{})
 		}
-		defer file.Close()
 	}
 	return log
+}
+
+func (l *Logger) Close() error {
+	if l.file != nil {
+		return l.file.Close()
+	}
+	return nil
 }
 
 func correctPath(path string) string {
