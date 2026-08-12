@@ -10,11 +10,11 @@ import (
 func TestLogger(t *testing.T) {
 	t.Run("new logger warning level", func(t *testing.T) {
 		testLogger := New("warn", "")
-		require.Equal(t, logrus.WarnLevel, testLogger.Level)
+		require.Equal(t, logrus.WarnLevel, testLogger.log.Level)
 	})
 
 	t.Run("new logger info level", func(t *testing.T) {
 		testLogger := New("info", "")
-		require.Equal(t, logrus.InfoLevel, testLogger.Level)
+		require.Equal(t, logrus.InfoLevel, testLogger.log.Level)
 	})
 }
