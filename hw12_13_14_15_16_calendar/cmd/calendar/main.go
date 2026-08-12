@@ -14,6 +14,7 @@ import (
 	internallogger "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -41,11 +42,20 @@ func main() {
 	// логгер
 	logg := internallogger.New(config.Logger.Level, config.Logger.LogFile)
 
-	// хранилище
-	storage := memorystorage.New()
-
 	// приложение
-	calendar := app.New(logg, storage)
+	var calendar *app.App
+
+	// хранилище
+	if config.Storage.InMemory {
+		memoryStorage := memorystorage.New()
+		calendar = app.New(logg, memoryStorage)
+	} else {
+		ctx := context.Background()
+		sqlStorage := sqlstorage.New()
+		sqlStorage.Connect(ctx)
+		defer sqlStorage.Close(ctx)
+		calendar = app.New(logg, sqlStorage)
+	}
 
 	server := internalhttp.NewServer(logg, calendar)
 
