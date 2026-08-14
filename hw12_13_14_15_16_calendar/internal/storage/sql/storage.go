@@ -26,7 +26,7 @@ type StorageConfig struct {
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
-	dsn := "postgresql://user:password@localhost:5432/calendar?sslmode=disable" //nolint:gosec
+	dsn := "postgresql://user:password@localhost:5432/calendar?sslmode=disable"
 	var err error
 	s.db, err = sql.Open("pgx", dsn)
 	if err != nil {
