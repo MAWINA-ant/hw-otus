@@ -7,7 +7,7 @@ import (
 
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage"
 	"github.com/google/uuid"
-	_ "github.com/jackc/pgx/stdlib" // PostgreSQL driver for database/sql
+	_ "github.com/lib/pq" // Анонимный импорт драйвера
 )
 
 type Storage struct {
