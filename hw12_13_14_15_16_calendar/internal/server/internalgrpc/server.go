@@ -92,13 +92,13 @@ func (s *Server) Stop(_ context.Context) error {
 	return nil
 }
 
-func (s *Server) CreateEvent(ctx context.Context, req *eventpb.CreateEventRequest) (*eventpb.CreateEventResponse, error) {
+func (s *Server) CreateEvent(c context.Context, req *eventpb.CreateEventRequest) (*eventpb.CreateEventResponse, error) {
 	event, err := fromProtoEvent(req.GetEvent())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	id, err := s.app.CreateEvent(ctx, event)
+	id, err := s.app.CreateEvent(c, event)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
@@ -106,7 +106,7 @@ func (s *Server) CreateEvent(ctx context.Context, req *eventpb.CreateEventReques
 	return &eventpb.CreateEventResponse{Id: id.String()}, nil
 }
 
-func (s *Server) UpdateEvent(ctx context.Context, req *eventpb.UpdateEventRequest) (*eventpb.UpdateEventResponse, error) {
+func (s *Server) UpdateEvent(c context.Context, req *eventpb.UpdateEventRequest) (*eventpb.UpdateEventResponse, error) {
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid event id: "+err.Error())
@@ -117,20 +117,20 @@ func (s *Server) UpdateEvent(ctx context.Context, req *eventpb.UpdateEventReques
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if err := s.app.EditEvent(ctx, id, event); err != nil {
+	if err := s.app.EditEvent(c, id, event); err != nil {
 		return nil, toGRPCError(err)
 	}
 
 	return &eventpb.UpdateEventResponse{}, nil
 }
 
-func (s *Server) DeleteEvent(ctx context.Context, req *eventpb.DeleteEventRequest) (*eventpb.DeleteEventResponse, error) {
+func (s *Server) DeleteEvent(c context.Context, req *eventpb.DeleteEventRequest) (*eventpb.DeleteEventResponse, error) {
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid event id: "+err.Error())
 	}
 
-	if err := s.app.RemoveEvent(ctx, id); err != nil {
+	if err := s.app.RemoveEvent(c, id); err != nil {
 		return nil, toGRPCError(err)
 	}
 

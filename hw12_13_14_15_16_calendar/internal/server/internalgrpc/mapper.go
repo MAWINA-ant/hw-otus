@@ -36,6 +36,7 @@ func toProtoEvents(events []*storage.Event) []*eventpb.Event {
 	}
 	return result
 }
+
 func fromProtoEvent(pe *eventpb.Event) (*storage.Event, error) {
 	e := &storage.Event{
 		Title:       pe.GetTitle(),
