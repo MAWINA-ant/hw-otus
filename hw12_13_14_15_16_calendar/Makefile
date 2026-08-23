@@ -65,14 +65,14 @@ generate: install-proto-deps
 
 	protoc --proto_path=api/ --go_out=internal/server/grpc/pb --go-grpc_out=internal/server/grpc/pb api/*.proto
 
-test:
+test: generate
 	go test -race 	./internal/logger ./internal/storage/memory \
 					./internal/server/http ./internal/server/grpc
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.63.4
 
-lint: install-lint-deps
+lint: install-lint-deps generate
 	golangci-lint run ./...
 
 .PHONY: build run build-img run-img version test lint
