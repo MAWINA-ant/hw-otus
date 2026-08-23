@@ -14,10 +14,10 @@ import (
 // format used by the HTTP server's logging middleware.
 func (s *Server) loggingInterceptor(
 	ctx context.Context,
-	req interface{},
+	req any,
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler,
-) (interface{}, error) {
+) (any, error) {
 	start := time.Now()
 
 	resp, err := handler(ctx, req)

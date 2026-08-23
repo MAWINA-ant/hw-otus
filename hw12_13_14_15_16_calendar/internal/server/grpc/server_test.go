@@ -42,10 +42,13 @@ func newTestClient(t *testing.T) eventpb.EventServiceClient {
 
 	dialer := func(context.Context, string) (net.Conn, error) { return lis.Dial() }
 
-	conn, err := grpc.NewClient("passthrough:///bufnet",
+	conn, err := grpc.DialContext(
+		context.Background(),
+		"passthrough:///bufnet",
 		grpc.WithContextDialer(dialer),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = conn.Close() })
 
