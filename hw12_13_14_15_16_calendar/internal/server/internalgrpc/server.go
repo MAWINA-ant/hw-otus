@@ -8,7 +8,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/grpc/eventpb"
+	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb"
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"

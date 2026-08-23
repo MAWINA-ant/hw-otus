@@ -12,8 +12,8 @@ import (
 
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/app"
 	internallogger "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger"
-	internalgrpc "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc"
 	memorystorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/sql"
 )
