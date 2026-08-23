@@ -30,21 +30,24 @@ func New() *Storage {
 	}
 }
 
-func (s *Storage) CreateEvent(_ context.Context, e *storage.Event) error { //lint:unused
+func (s *Storage) CreateEvent(_ context.Context, e *storage.Event) (uuid.UUID, error) { //lint:unused
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	idx := slices.IndexFunc(s.sortedUUIDs, func(pair kv) bool {
 		return pair.Value.Equal(e.DateTime)
 	})
 	if idx != -1 {
-		return storage.ErrDateBusy
+		return uuid.Nil, storage.ErrDateBusy
+	}
+	if e.ID == uuid.Nil {
+		e.ID = uuid.New()
 	}
 	s.eventMap[e.ID] = e
 	s.sortedUUIDs = append(s.sortedUUIDs, kv{e.ID, e.DateTime})
 	sort.Slice(s.sortedUUIDs, func(i, j int) bool {
 		return s.sortedUUIDs[i].Value.Before(s.sortedUUIDs[j].Value)
 	})
-	return nil
+	return e.ID, nil
 }
 
 func (s *Storage) EditEvent(_ context.Context, id uuid.UUID, e *storage.Event) error { //lint:unused
@@ -53,7 +56,7 @@ func (s *Storage) EditEvent(_ context.Context, id uuid.UUID, e *storage.Event) e
 	if _, ok := s.eventMap[id]; !ok {
 		return storage.ErrIDNotFound
 	}
-	s.eventMap[e.ID] = e
+	s.eventMap[id] = e
 	return nil
 }
 

@@ -36,7 +36,7 @@ run-rabbit:
 	-e RABBITMQ_DEFAULT_PASS=$(RABBIT_PASSWORD) \
 	rabbitmq:management
 
-build:
+build: generate
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 
 run: build
@@ -54,8 +54,20 @@ run-img: build-img
 version: build
 	$(BIN) version
 
+# needed install protobuf `apt install protobuf-compiler protoc-gen-go protoc-gen-go-grpc`
+install-proto-deps:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+
+generate: install-proto-deps
+	rm -rf internal/server/pb
+	mkdir -p internal/server/pb
+
+	protoc --proto_path=api/ --go_out=internal/server/grpc/pb --go-grpc_out=internal/server/grpc/pb api/*.proto
+
 test:
-	go test -race ./internal/logger ./internal/storage/memory
+	go test -race 	./internal/logger ./internal/storage/memory \
+					./internal/server/http ./internal/server/grpc
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.63.4

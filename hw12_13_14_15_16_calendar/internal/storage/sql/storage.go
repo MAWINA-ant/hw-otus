@@ -99,17 +99,19 @@ func (s *Storage) Close(_ context.Context) error {
 	return nil
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, e *storage.Event) error {
+func (s *Storage) CreateEvent(ctx context.Context, e *storage.Event) (uuid.UUID, error) {
 	query := `
 	INSERT INTO events (id, title, date_time, duration, description, user_id, notify_time)
 	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
-	e.ID = uuid.New()
+	if e.ID == uuid.Nil {
+		e.ID = uuid.New()
+	}
 
 	_, err := s.db.ExecContext(ctx, query, e.ID, e.Title, e.DateTime, int64(e.Duration),
 		e.Description, e.UserID, e.NotifyTime)
-	return err
+	return e.ID, err
 }
 
 func (s *Storage) EditEvent(ctx context.Context, id uuid.UUID, e *storage.Event) error {

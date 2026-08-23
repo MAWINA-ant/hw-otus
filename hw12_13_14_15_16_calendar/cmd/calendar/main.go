@@ -12,6 +12,7 @@ import (
 
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/app"
 	internallogger "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger"
+	internalgrpc "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/sql"
@@ -54,7 +55,8 @@ func main() {
 		calendar = app.New(logg, sqlStorage)
 	}
 
-	server := internalhttp.NewServerWithConfig(logg, calendar, internalhttp.ServerConfig(config.Server))
+	httpServer := internalhttp.NewServerWithConfig(logg, calendar, internalhttp.ServerConfig(config.Server))
+	grpcServer := internalgrpc.NewServer(logg, calendar, internalgrpc.ServerConfig(config.GRPCServer))
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -63,19 +65,47 @@ func main() {
 	go func() {
 		<-ctx.Done()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
+		stopCtx, stopCancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer stopCancel()
 
-		if err := server.Stop(ctx); err != nil {
+		if err := httpServer.Stop(stopCtx); err != nil {
 			logg.Error("failed to stop http server: " + err.Error())
+		}
+		if err := grpcServer.Stop(stopCtx); err != nil {
+			logg.Error("failed to stop grpc server: " + err.Error())
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	errCh := make(chan error, 2)
 
-	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1) //nolint:gocritic
+	go func() {
+		logg.Info("calendar http api is running...")
+		if err := httpServer.Start(ctx); err != nil {
+			errCh <- fmt.Errorf("failed to start http server: %w", err)
+			return
+		}
+		errCh <- nil
+	}()
+
+	go func() {
+		logg.Info("calendar grpc api is running...")
+		if err := grpcServer.Start(ctx); err != nil {
+			errCh <- fmt.Errorf("failed to start grpc server: %w", err)
+			return
+		}
+		errCh <- nil
+	}()
+
+	var exitCode int
+	for i := 0; i < 2; i++ {
+		if err := <-errCh; err != nil {
+			logg.Error(err.Error())
+			exitCode = 1
+			cancel()
+		}
+	}
+
+	if exitCode != 0 {
+		os.Exit(exitCode) //nolint:gocritic
 	}
 }
