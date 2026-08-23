@@ -41,7 +41,7 @@ func TestCreateEditDeleteEvent(t *testing.T) {
 	srv := newTestServer()
 	handler := srv.Handler()
 
-	eventJson := EventJSON{
+	eventJSON := EventJSON{
 		Title:       "meeting",
 		DateTime:    time.Date(2026, time.August, 20, 10, 0, 0, 0, time.UTC),
 		Duration:    "30m",
@@ -51,7 +51,7 @@ func TestCreateEditDeleteEvent(t *testing.T) {
 
 	var created CreateEventResponse
 	t.Run("create", func(t *testing.T) {
-		body, err := json.Marshal(eventJson)
+		body, err := json.Marshal(eventJSON)
 		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, "/events", bytes.NewReader(body))
@@ -64,7 +64,7 @@ func TestCreateEditDeleteEvent(t *testing.T) {
 	})
 
 	t.Run("create with bad duration", func(t *testing.T) {
-		bad := eventJson
+		bad := eventJSON
 		bad.Duration = "not-a-duration"
 		body, err := json.Marshal(bad)
 		require.NoError(t, err)
@@ -91,7 +91,7 @@ func TestCreateEditDeleteEvent(t *testing.T) {
 	})
 
 	t.Run("update", func(t *testing.T) {
-		updated := eventJson
+		updated := eventJSON
 		updated.Title = "meeting (rescheduled)"
 		updated.DateTime = time.Date(2026, time.August, 21, 10, 0, 0, 0, time.UTC)
 		body, err := json.Marshal(updated)
@@ -114,7 +114,7 @@ func TestCreateEditDeleteEvent(t *testing.T) {
 	})
 
 	t.Run("update unknown id", func(t *testing.T) {
-		body, err := json.Marshal(eventJson)
+		body, err := json.Marshal(eventJSON)
 		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPut, "/events/00000000-0000-0000-0000-000000000000", bytes.NewReader(body))

@@ -10,11 +10,11 @@ import "google/protobuf/duration.proto";
 message Event {
   string id = 1;
   string title = 2;
-  google.protobuf.Timestamp date_time = 3;
+  google.protobuf.Timestamp dateTime = 3;
   google.protobuf.Duration duration = 4;
   string description = 5;
-  string user_id = 6;
-  google.protobuf.Timestamp notify_time = 7;
+  string userId = 6;
+  google.protobuf.Timestamp notifyTime = 7;
 }
 
 message CreateEventRequest {

@@ -60,8 +60,8 @@ install-proto-deps:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
 generate: install-proto-deps
-	rm -rf internal/server/pb
-	mkdir -p internal/server/pb
+	rm -rf internal/server/internalgrpc/eventpb
+	mkdir -p internal/server/internalgrpc/eventpb
 
 	protoc --proto_path=api/ --go_out=internal/server/internalgrpc/eventpb --go-grpc_out=internal/server/internalgrpc/eventpb api/*.proto
 

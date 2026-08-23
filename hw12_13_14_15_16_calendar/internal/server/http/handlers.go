@@ -14,13 +14,13 @@ import (
 const dateLayout = "2006-01-02"
 
 func (s *Server) createEventHandler(w http.ResponseWriter, r *http.Request) {
-	var eventJson EventJSON
-	if err := json.NewDecoder(r.Body).Decode(&eventJson); err != nil {
+	var eventJSON EventJSON
+	if err := json.NewDecoder(r.Body).Decode(&eventJSON); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
 		return
 	}
 
-	event, err := eventJson.toStorageEvent()
+	event, err := eventJSON.toStorageEvent()
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -42,13 +42,13 @@ func (s *Server) updateEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var eventJson EventJSON
-	if err := json.NewDecoder(r.Body).Decode(&eventJson); err != nil {
+	var eventJSON EventJSON
+	if err := json.NewDecoder(r.Body).Decode(&eventJSON); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
 		return
 	}
 
-	event, err := eventJson.toStorageEvent()
+	event, err := eventJSON.toStorageEvent()
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return

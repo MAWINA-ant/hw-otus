@@ -11,11 +11,11 @@ import (
 type EventJSON struct {
 	ID          string     `json:"id,omitempty"`
 	Title       string     `json:"title"`
-	DateTime    time.Time  `json:"date_time"`
+	DateTime    time.Time  `json:"dateTime"`
 	Duration    string     `json:"duration"`
 	Description string     `json:"description,omitempty"`
-	UserID      string     `json:"user_id"`
-	NotifyTime  *time.Time `json:"notify_time,omitempty"`
+	UserID      string     `json:"userId"`
+	NotifyTime  *time.Time `json:"notifyTime,omitempty"`
 }
 
 type CreateEventResponse struct {
@@ -60,7 +60,7 @@ func (e EventJSON) toStorageEvent() (*storage.Event, error) {
 }
 
 func toEventJSON(e *storage.Event) EventJSON {
-	eventJson := EventJSON{
+	eventJSON := EventJSON{
 		ID:          e.ID.String(),
 		Title:       e.Title,
 		DateTime:    e.DateTime,
@@ -71,10 +71,10 @@ func toEventJSON(e *storage.Event) EventJSON {
 
 	if !e.NotifyTime.IsZero() {
 		notifyTime := e.NotifyTime
-		eventJson.NotifyTime = &notifyTime
+		eventJSON.NotifyTime = &notifyTime
 	}
 
-	return eventJson
+	return eventJSON
 }
 
 func eventsToEventsJSON(events []*storage.Event) []EventJSON {
