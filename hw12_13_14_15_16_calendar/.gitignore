@@ -1,3 +1,2 @@
 logs/
 bin/
-internal/server/internalgrpc/eventpb/
