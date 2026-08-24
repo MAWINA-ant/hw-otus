@@ -66,7 +66,7 @@ generate: install-proto-deps
 
 	protoc --proto_path=api/ --go_out=internal/server/internalgrpc/eventpb --go-grpc_out=internal/server/internalgrpc/eventpb api/*.proto
 
-test: generate
+test:
 	go test -race 	./internal/logger ./internal/storage/memory \
 					./internal/server/http ./internal/server/internalgrpc
 
