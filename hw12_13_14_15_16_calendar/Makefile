@@ -56,6 +56,7 @@ version: build
 
 # needed install protobuf `apt install protobuf-compiler protoc-gen-go protoc-gen-go-grpc`
 install-proto-deps:
+	@command -v protoc >/dev/null 2>&1 || sudo apt install -y protobuf-compiler
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
@@ -72,7 +73,7 @@ test: generate
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.63.4
 
-lint: install-lint-deps
+lint: install-lint-deps generate
 	golangci-lint run ./...
 
 .PHONY: build run build-img run-img version test lint
