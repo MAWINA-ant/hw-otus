@@ -1,7 +1,7 @@
 package internalgrpc
 
 import (
-	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb"
+	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb" //nolint
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/durationpb"

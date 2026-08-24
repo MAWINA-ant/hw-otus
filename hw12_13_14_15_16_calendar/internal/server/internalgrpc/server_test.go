@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/app"
-	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb"
+	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb" //nolint
 	memorystorage "github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
