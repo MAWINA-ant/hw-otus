@@ -6,6 +6,9 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage"
+	"github.com/google/uuid"
 )
 
 type Server struct {
@@ -27,7 +30,13 @@ type Logger interface {
 	Debug(args ...interface{})
 }
 
-type Application interface { // TODO
+type Application interface {
+	CreateEvent(ctx context.Context, event *storage.Event) (uuid.UUID, error)
+	EditEvent(ctx context.Context, id uuid.UUID, event *storage.Event) error
+	RemoveEvent(ctx context.Context, id uuid.UUID) error
+	DayEvents(ctx context.Context, d time.Time) ([]*storage.Event, error)
+	WeekEvents(ctx context.Context, d time.Time) ([]*storage.Event, error)
+	MonthEvents(ctx context.Context, d time.Time) ([]*storage.Event, error)
 }
 
 type LogEntry struct {
@@ -60,13 +69,27 @@ func NewServerWithConfig(logger Logger, app Application, config ServerConfig) *S
 	}
 }
 
-func (s *Server) Start(ctx context.Context) error {
+// Handler builds the full HTTP routing tree wrapped with the logging middleware.
+// It is exported for tests, which can exercise it directly via httptest without
+// binding a real listener.
+func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", s.helloHandler)
 	mux.HandleFunc("/hello", s.helloHandler)
 
-	handler := loggingMiddleware(mux, s.logger)
+	mux.HandleFunc("POST /events", s.createEventHandler)
+	mux.HandleFunc("PUT /events/{id}", s.updateEventHandler)
+	mux.HandleFunc("DELETE /events/{id}", s.deleteEventHandler)
+	mux.HandleFunc("GET /events/day", s.listDayEventsHandler)
+	mux.HandleFunc("GET /events/week", s.listWeekEventsHandler)
+	mux.HandleFunc("GET /events/month", s.listMonthEventsHandler)
+
+	return loggingMiddleware(mux, s.logger)
+}
+
+func (s *Server) Start(ctx context.Context) error {
+	handler := s.Handler()
 
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
 

@@ -23,6 +23,8 @@ linters-settings:
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/logger
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/http
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/sql
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory
           - github.com/lib/pq
@@ -34,8 +36,10 @@ linters-settings:
         allow:
           - $gostd
           - github.com/stretchr/testify
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/app
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage
           - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/storage/memory
+          - github.com/MAWINA-ant/hw-otus/hw12_13_14_15_calendar/internal/server/internalgrpc/eventpb
           - github.com/google/uuid
           - github.com/sirupsen/logrus
 issues:

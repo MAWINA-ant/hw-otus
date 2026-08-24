@@ -16,3 +16,7 @@ password = "password"
 [server]
 host = "127.0.0.1"
 port = 12345
+
+[grpc_server]
+host = "127.0.0.1"
+port = 12346

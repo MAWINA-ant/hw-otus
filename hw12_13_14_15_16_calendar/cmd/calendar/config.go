@@ -14,6 +14,7 @@ type Config struct {
 	Storage    StorageConf    `toml:"storage"`
 	SQLStorage SQLStorageConf `toml:"sql_storage"`
 	Server     ServerConf     `toml:"server"`
+	GRPCServer ServerConf     `toml:"grpc_server"`
 }
 
 type LoggerConf struct {

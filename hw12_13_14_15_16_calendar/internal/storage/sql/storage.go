@@ -40,18 +40,18 @@ func (s *Storage) Connect(ctx context.Context) error {
 	CREATE TABLE IF NOT EXISTS events (
 		id UUID PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
-		date_time TIMESTAMP NOT NULL,
+		dateTime TIMESTAMP NOT NULL,
 		duration BIGINT NOT NULL,
 		description TEXT,
-		user_id VARCHAR(255) NOT NULL,
-		notify_time TIMESTAMP,
+		userId VARCHAR(255) NOT NULL,
+		notifyTime TIMESTAMP,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
 
-	CREATE INDEX IF NOT EXISTS idx_events_date_time ON events(date_time);
-	CREATE INDEX IF NOT EXISTS idx_events_user_id ON events(user_id);
-	CREATE INDEX IF NOT EXISTS idx_events_notify_time ON events(notify_time);
+	CREATE INDEX IF NOT EXISTS idx_events_dateTime ON events(dateTime);
+	CREATE INDEX IF NOT EXISTS idx_events_userId ON events(userId);
+	CREATE INDEX IF NOT EXISTS idx_events_notifyTime ON events(notifyTime);
 	`
 
 	_, err = s.db.ExecContext(ctx, query)
@@ -74,18 +74,18 @@ func (s *Storage) ConnectWithConfig(ctx context.Context, config StorageConfig) e
 	CREATE TABLE IF NOT EXISTS events (
 		id UUID PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
-		date_time TIMESTAMP NOT NULL,
+		dateTime TIMESTAMP NOT NULL,
 		duration BIGINT NOT NULL,
 		description TEXT,
-		user_id VARCHAR(255) NOT NULL,
-		notify_time TIMESTAMP,
+		userId VARCHAR(255) NOT NULL,
+		notifyTime TIMESTAMP,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
 
-	CREATE INDEX IF NOT EXISTS idx_events_date_time ON events(date_time);
-	CREATE INDEX IF NOT EXISTS idx_events_user_id ON events(user_id);
-	CREATE INDEX IF NOT EXISTS idx_events_notify_time ON events(notify_time);
+	CREATE INDEX IF NOT EXISTS idx_events_dateTime ON events(dateTime);
+	CREATE INDEX IF NOT EXISTS idx_events_userId ON events(userId);
+	CREATE INDEX IF NOT EXISTS idx_events_notifyTime ON events(notifyTime);
 	`
 
 	_, err = s.db.ExecContext(ctx, query)
@@ -99,23 +99,25 @@ func (s *Storage) Close(_ context.Context) error {
 	return nil
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, e *storage.Event) error {
+func (s *Storage) CreateEvent(ctx context.Context, e *storage.Event) (uuid.UUID, error) {
 	query := `
-	INSERT INTO events (id, title, date_time, duration, description, user_id, notify_time)
+	INSERT INTO events (id, title, dateTime, duration, description, userId, notifyTime)
 	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
-	e.ID = uuid.New()
+	if e.ID == uuid.Nil {
+		e.ID = uuid.New()
+	}
 
 	_, err := s.db.ExecContext(ctx, query, e.ID, e.Title, e.DateTime, int64(e.Duration),
 		e.Description, e.UserID, e.NotifyTime)
-	return err
+	return e.ID, err
 }
 
 func (s *Storage) EditEvent(ctx context.Context, id uuid.UUID, e *storage.Event) error {
 	query := `
 	UPDATE events 
-	SET title = $1, date_time = $2, duration = $3, description = $4, user_id = $5, notify_time = $6
+	SET title = $1, dateTime = $2, duration = $3, description = $4, userId = $5, notifyTime = $6
 	WHERE id = $7
 	`
 
@@ -185,10 +187,10 @@ func (s *Storage) scanEvents(ctx context.Context, startTime, endTime time.Time) 
 	var events []*storage.Event
 
 	query := `
-	SELECT id, title, date_time, duration, description, user_id, notify_time
+	SELECT id, title, dateTime, duration, description, userId, notifyTime
 	FROM events
-	WHERE date_time >= $1 AND date_time < $2
-	ORDER BY date_time ASC
+	WHERE dateTime >= $1 AND dateTime < $2
+	ORDER BY dateTime ASC
 	`
 	rows, err := s.db.QueryContext(ctx, query, startTime, endTime)
 	if err != nil {

@@ -21,7 +21,7 @@ type Logger interface {
 }
 
 type Storage interface {
-	CreateEvent(ctx context.Context, e *storage.Event) error
+	CreateEvent(ctx context.Context, e *storage.Event) (uuid.UUID, error)
 	EditEvent(ctx context.Context, ID uuid.UUID, e *storage.Event) error
 	RemoveEvent(ctx context.Context, ID uuid.UUID) error
 	DayEvents(ctx context.Context, d time.Time) ([]*storage.Event, error)
@@ -36,17 +36,11 @@ func New(logger Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id uuid.UUID, title string) error {
-	event := &storage.Event{}
-	event.ID = id
-	event.Title = title
+func (a *App) CreateEvent(ctx context.Context, event *storage.Event) (uuid.UUID, error) {
 	return a.storage.CreateEvent(ctx, event)
 }
 
-func (a *App) EditEvent(ctx context.Context, id uuid.UUID, title string) error {
-	event := &storage.Event{}
-	event.ID = id
-	event.Title = title
+func (a *App) EditEvent(ctx context.Context, id uuid.UUID, event *storage.Event) error {
 	return a.storage.EditEvent(ctx, id, event)
 }
 
